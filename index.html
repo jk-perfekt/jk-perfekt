@@ -7,6 +7,24 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "WKLEJ_TUTAJ",
+  authDomain: "WKLEJ_TUTAJ",
+  projectId: "WKLEJ_TUTAJ",
+  storageBucket: "WKLEJ_TUTAJ",
+  messagingSenderId: "WKLEJ_TUTAJ",
+  appId: "WKLEJ_TUTAJ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
 <style>
 body{
 margin:0;
@@ -15,7 +33,6 @@ background:#0b1220;
 color:#fff;
 }
 
-/* HERO */
 header{
 height:100vh;
 display:flex;
@@ -45,15 +62,10 @@ font-weight:700;
 display:inline-block;
 }
 
-/* SEKCJE */
 section{
 max-width:1000px;
 margin:auto;
 padding:60px 20px;
-}
-
-h2{
-margin-bottom:15px;
 }
 
 .card{
@@ -76,8 +88,6 @@ border-radius:14px;
 
 .slide{
 position:absolute;
-top:0;
-left:0;
 width:100%;
 height:100%;
 object-fit:cover;
@@ -115,6 +125,7 @@ color:white;
 cursor:pointer;
 }
 
+/* REVIEW */
 .review{
 background:#0b1220;
 padding:10px;
@@ -134,7 +145,6 @@ margin-top:10px;
 <a class="btn" href="tel:534564545">📞 Zadzwoń teraz</a>
 </header>
 
-<!-- O FIRMIE -->
 <section>
 <h2>O firmie</h2>
 
@@ -152,7 +162,6 @@ margin-top:10px;
 </div>
 </section>
 
-<!-- OPINIE -->
 <section>
 <h2>Opinie klientów</h2>
 
@@ -174,7 +183,6 @@ margin-top:10px;
 </div>
 </section>
 
-<!-- KONTAKT -->
 <section>
 <h2>Kontakt</h2>
 
@@ -190,53 +198,43 @@ margin-top:10px;
 const slides = document.querySelectorAll(".slide");
 let index = 0;
 
-if(slides.length){
 setInterval(() => {
   slides[index].classList.remove("active");
   index = (index + 1) % slides.length;
   slides[index].classList.add("active");
 }, 3000);
-}
 
-// OPINIE
+// ADD REVIEW (FIREBASE)
 function addReview(){
 const name=document.getElementById("name").value.trim();
 const comment=document.getElementById("comment").value.trim();
 const stars=Number(document.getElementById("stars").value);
 
-if(!name||!comment){
-alert("Uzupełnij dane");
-return;
-}
+if(!name||!comment) return;
 
-let reviews=JSON.parse(localStorage.getItem("reviews")||"[]");
-
-reviews.unshift({
+db.collection("reviews").add({
 name,
 comment,
 stars,
 date:new Date().toLocaleDateString("pl-PL")
 });
 
-localStorage.setItem("reviews",JSON.stringify(reviews));
-renderReviews();
-
 document.getElementById("name").value="";
 document.getElementById("comment").value="";
 }
 
+// LOAD REVIEWS
 function renderReviews(){
 const container=document.getElementById("reviews");
 container.innerHTML="";
 
-let reviews=JSON.parse(localStorage.getItem("reviews")||"[]");
+db.collection("reviews")
+.orderBy("date","desc")
+.get()
+.then(snapshot=>{
+snapshot.forEach(doc=>{
+const r=doc.data();
 
-if(reviews.length===0){
-container.innerHTML="<p>Brak opinii — dodaj pierwszą!</p>";
-return;
-}
-
-reviews.forEach(r=>{
 let starsText="★".repeat(r.stars);
 
 const div=document.createElement("div");
@@ -244,12 +242,13 @@ div.className="review";
 
 div.innerHTML=`
 <b>${r.name}</b><br>
-<span class="rating">${starsText}</span>
+<span style="color:gold">${starsText}</span>
 <p>${r.comment}</p>
 <small style="opacity:0.6">${r.date}</small>
 `;
 
 container.appendChild(div);
+});
 });
 }
 
