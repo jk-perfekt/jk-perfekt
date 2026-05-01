@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JK Perfekt</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+font-family:Poppins,sans-serif;
+background:#0b1220;
+color:#fff;
+}
+
+/* HERO */
+header{
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:20px;
+background:
+linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.85)),
+url('https://i.ibb.co/WvBM7hb6/zdjecie6.jpg');
+background-size:cover;
+background-position:center;
+}
+
+h1{font-size:48px;margin:0}
+p{opacity:0.85}
+
+.btn{
+margin-top:20px;
+padding:14px 26px;
+background:#2563eb;
+border-radius:30px;
+color:white;
+text-decoration:none;
+font-weight:700;
+display:inline-block;
+}
+
+/* SEKCJE */
+section{
+max-width:1000px;
+margin:auto;
+padding:60px 20px;
+}
+
+h2{
+margin-bottom:15px;
+}
+
+.card{
+background:#121c2e;
+padding:20px;
+border-radius:14px;
+margin-top:15px;
+}
+
+/* SLIDER */
+.slider{
+width:100%;
+max-width:450px;
+height:280px;
+margin:20px auto;
+position:relative;
+overflow:hidden;
+border-radius:14px;
+}
+
+.slide{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+opacity:0;
+transition:0.8s ease;
+}
+
+.slide.active{
+opacity:1;
+}
+
+/* FORM */
+input,textarea,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+background:#0b1220;
+color:#fff;
+}
+
+textarea{
+min-height:100px;
+resize:none;
+}
+
+button{
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+}
+
+.review{
+background:#0b1220;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+}
+
+.rating{color:gold}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>JK Perfekt</h1>
+<p>Wykończenia wnętrz premium</p>
+<a class="btn" href="tel:534564545">📞 Zadzwoń teraz</a>
+</header>
+
+<!-- O FIRMIE -->
+<section>
+<h2>O firmie</h2>
+
+<div class="slider">
+  <img class="slide active" src="https://i.ibb.co/S4X26bW8/zdjecie2.jpg">
+  <img class="slide" src="https://i.ibb.co/p6KbPq1j/zdjecie3.jpg">
+  <img class="slide" src="https://i.ibb.co/FqbhY4xm/zdjecie4.webp">
+  <img class="slide" src="https://i.ibb.co/4gnLTMh3/zdjecie5.webp">
+</div>
+
+<div class="card">
+<p>Firma Jk Perfekt Jarosław Kumor działa w branży wykończeń wnętrz na terenie Kielc i województwa świętokrzyskiego.</p>
+<p>Specjalizujemy się w kompleksowych wykończeniach mieszkań, remontach oraz pracach wykończeniowych „pod klucz”.</p>
+<p>Zapewniamy solidne wykonanie, doświadczenie oraz indywidualne podejście do każdego klienta.</p>
+</div>
+</section>
+
+<!-- OPINIE -->
+<section>
+<h2>Opinie klientów</h2>
+
+<div class="card">
+<input id="name" placeholder="Imię">
+<textarea id="comment" placeholder="Opinia"></textarea>
+
+<select id="stars">
+<option value="5">★★★★★</option>
+<option value="4">★★★★</option>
+<option value="3">★★★</option>
+<option value="2">★★</option>
+<option value="1">★</option>
+</select>
+
+<button onclick="addReview()">Dodaj opinię</button>
+
+<div id="reviews"></div>
+</div>
+</section>
+
+<!-- KONTAKT -->
+<section>
+<h2>Kontakt</h2>
+
+<div class="card">
+<p>📍 Kielce</p>
+<p>📞 534 564 545</p>
+<a class="btn" href="tel:534564545">Zadzwoń</a>
+</div>
+</section>
+
+<script>
+// SLIDER
+const slides = document.querySelectorAll(".slide");
+let index = 0;
+
+if(slides.length){
+setInterval(() => {
+  slides[index].classList.remove("active");
+  index = (index + 1) % slides.length;
+  slides[index].classList.add("active");
+}, 3000);
+}
+
+// OPINIE
+function addReview(){
+const name=document.getElementById("name").value.trim();
+const comment=document.getElementById("comment").value.trim();
+const stars=Number(document.getElementById("stars").value);
+
+if(!name||!comment){
+alert("Uzupełnij dane");
+return;
+}
+
+let reviews=JSON.parse(localStorage.getItem("reviews")||"[]");
+
+reviews.unshift({
+name,
+comment,
+stars,
+date:new Date().toLocaleDateString("pl-PL")
+});
+
+localStorage.setItem("reviews",JSON.stringify(reviews));
+renderReviews();
+
+document.getElementById("name").value="";
+document.getElementById("comment").value="";
+}
+
+function renderReviews(){
+const container=document.getElementById("reviews");
+container.innerHTML="";
+
+let reviews=JSON.parse(localStorage.getItem("reviews")||"[]");
+
+if(reviews.length===0){
+container.innerHTML="<p>Brak opinii — dodaj pierwszą!</p>";
+return;
+}
+
+reviews.forEach(r=>{
+let starsText="★".repeat(r.stars);
+
+const div=document.createElement("div");
+div.className="review";
+
+div.innerHTML=`
+<b>${r.name}</b><br>
+<span class="rating">${starsText}</span>
+<p>${r.comment}</p>
+<small style="opacity:0.6">${r.date}</small>
+`;
+
+container.appendChild(div);
+});
+}
+
+document.addEventListener("DOMContentLoaded",renderReviews);
+</script>
+
+</body>
+</html>
